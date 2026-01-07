@@ -1,0 +1,41 @@
+apiVersion: apps/v1 
+kind: Deployment
+metadata:
+  name: travelpack-deployment
+  namespace: travelpack
+  labels:
+    app: travelpack
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: travelpack
+  template:
+    metadata:
+      labels:
+        app: travelpack
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "443"
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+        - name: travelpack-container
+          image: lionel1109/travelpack:latest
+          ports:
+            - containerPort: 443
+          volumeMounts:
+            - name: tls-certs
+              mountPath: /etc/ssl/certs
+              readOnly: true
+          resources:
+            requests:
+              memory: "500Mi"
+              cpu: "800m"
+            limits:
+              memory: "1000Mi"
+              cpu: "1000m"
+      volumes:
+        - name: tls-certs
+          secret:
+            secretName: travelpack-tls
